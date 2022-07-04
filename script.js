@@ -17,7 +17,7 @@ function pushTodo(){
             formattedtime: new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds(),
             isCompleted: 'false'
         }
-        todos.push(todoitem);
+        todos.unshift(todoitem);
         removeTodo();
     }
     else{
@@ -58,6 +58,7 @@ function display(todo){
     var deletebox= document.createElement('div');
         deletebox.classList.add('del-box');
         deletebox.textContent= "X";
+        
     
     todolistbox.appendChild(itemBodyDiv); 
     itemBodyDiv.appendChild(checkbox);
@@ -67,4 +68,39 @@ function display(todo){
     itemBodyDiv.appendChild(deletebox);
 
     input.value= "";
+    checkbox.addEventListener('change',()=> toggle(event));
+    deletebox.addEventListener('click',()=> deleteTask(event))
+}
+
+function toggle(event){
+    const checkedEleId= event.target.parentElement.id;
+    todos.forEach(todo =>{
+            if(checkedEleId===todo.uid){
+                var currIndex= todos.indexOf(todo);
+                if(event.target.checked){
+                    element= todos.splice(currIndex,1)[0];
+                    todos.push(element); 
+                }
+               /* else if(!event.target.checked){
+                    var toIndex;
+                    toIndex= fromIndex;
+                   const newfromIndex= todos.indexOf(todo);
+                   element= todos.splice(newfromIndex,1)[0];
+                   todos.splice(toIndex,0,element);
+                }*/
+            }
+        })
+    
+}
+
+
+function deleteTask(event){
+    event.target.parentElement.remove();
+    const delEleId= event.target.parentElement.id;
+    todos.forEach(todo => {
+        if(todo.uid=== delEleId){
+            const index= todos.indexOf(todo);
+            todos.splice(index,1);
+        }
+    })
 }
