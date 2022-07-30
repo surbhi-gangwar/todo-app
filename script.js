@@ -2,22 +2,24 @@ const enterbtn= document.querySelector(".enter-btn");
 const input= document.getElementById("text-input");
 const todolistbox= document.getElementById("todo-list");
 const checkboxele= document.querySelector(".box");
-const todos= [];
+var todos= [];
 
 function enterPressed(event){
     if(event.keyCode=== 13){
         pushTodo();
     }
 }
+
 function pushTodo(){
+    const currentDate = new Date();
     if(input.value.length!= 0){
         var todoitem= {
             task: input.value,
-            uid:  input + "-" + new Date().getTime().toString(),
-            formattedtime: new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds(),
-            isCompleted: 'false'
+            uid:  input.value + "-" + currentDate.getTime(),
+            formattedtime: currentDate,
+            isCompleted: false
         }
-        todos.unshift(todoitem);
+        todos.push(todoitem);
         removeTodo();
     }
     else{
@@ -32,6 +34,11 @@ function removeTodo(){
 }
 
 function render(){
+    todos = todos.sort((previousTodo, nextTodo) => {
+        const booleanSorting = previousTodo.isCompleted - nextTodo.isCompleted;
+        const timeSorting = nextTodo.formattedtime.getTime() - previousTodo.formattedtime.getTime();
+        return booleanSorting || timeSorting
+    })
     todos.forEach(todo => display(todo))
 }   
 
@@ -42,6 +49,7 @@ function display(todo){
 
     var checkbox = document.createElement('input');
         checkbox.type = "checkbox";
+        checkbox.checked = todo.isCompleted;
         checkbox.classList.add('cbox');
     
     var taskdatediv= document.createElement('div');
@@ -53,7 +61,8 @@ function display(todo){
 
     var date= document.createElement('p');
         date.classList.add('datetime');
-        date.textContent= todo.formattedtime;
+        const time = todo.formattedtime.getHours() + ":" + todo.formattedtime.getMinutes() + ":" + todo.formattedtime.getSeconds()
+        date.textContent= time;
 
     var deletebox= document.createElement('div');
         deletebox.classList.add('del-box');
@@ -73,34 +82,18 @@ function display(todo){
 }
 
 function toggle(event){
-    const checkedEleId= event.target.parentElement.id;
-    todos.forEach(todo =>{
-            if(checkedEleId===todo.uid){
-                var currIndex= todos.indexOf(todo);
-                if(event.target.checked){
-                    element= todos.splice(currIndex,1)[0];
-                    todos.push(element); 
-                }
-               /* else if(!event.target.checked){
-                    var toIndex;
-                    toIndex= fromIndex;
-                   const newfromIndex= todos.indexOf(todo);
-                   element= todos.splice(newfromIndex,1)[0];
-                   todos.splice(toIndex,0,element);
-                }*/
-            }
-        })
-    
+    const checkedEleId = event.target.parentElement.id;
+    todos = todos.map(todo => {
+        if(todo.uid === checkedEleId) {
+            todo.isCompleted = !todo.isCompleted;
+        }
+        return todo;
+    })
+    removeTodo();
 }
 
-
 function deleteTask(event){
-    event.target.parentElement.remove();
     const delEleId= event.target.parentElement.id;
-    todos.forEach(todo => {
-        if(todo.uid=== delEleId){
-            const index= todos.indexOf(todo);
-            todos.splice(index,1);
-        }
-    })
+    todos = todos.filter(todo => todo.uid !== delEleId)
+    removeTodo(); 
 }
